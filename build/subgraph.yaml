@@ -1,6 +1,6 @@
 specVersion: 0.0.2
 schema:
-  file: ./schema.graphql
+  file: schema.graphql
 dataSources:
   - kind: ethereum/contract
     name: Contract
@@ -35,7 +35,7 @@ dataSources:
         - RecoverToVault
       abis:
         - name: Contract
-          file: ./abis/Contract.json
+          file: Contract/abis/Contract.json
       eventHandlers:
         - event: UpdateBeneficiary(indexed address)
           handler: handleUpdateBeneficiary
@@ -75,4 +75,4 @@ dataSources:
           handler: handleScriptResult
         - event: RecoverToVault(indexed address,indexed address,uint256)
           handler: handleRecoverToVault
-      file: ./src/mapping.ts
+      file: Contract/Contract.wasm
