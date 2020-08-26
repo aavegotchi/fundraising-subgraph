@@ -154,6 +154,15 @@ export class Order extends Entity {
     this.set("collateral", Value.fromBytes(value));
   }
 
+  get reserveRatio(): BigInt {
+    let value = this.get("reserveRatio");
+    return value.toBigInt();
+  }
+
+  set reserveRatio(value: BigInt) {
+    this.set("reserveRatio", Value.fromBigInt(value));
+  }
+
   get value(): BigInt {
     let value = this.get("value");
     return value.toBigInt();
@@ -170,5 +179,23 @@ export class Order extends Entity {
 
   set status(value: string) {
     this.set("status", Value.fromString(value));
+  }
+
+  get price(): BigInt {
+    let value = this.get("price");
+    return value.toBigInt();
+  }
+
+  set price(value: BigInt) {
+    this.set("price", Value.fromBigInt(value));
+  }
+
+  get time(): BigInt {
+    let value = this.get("time");
+    return value.toBigInt();
+  }
+
+  set time(value: BigInt) {
+    this.set("time", Value.fromBigInt(value));
   }
 }

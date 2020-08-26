@@ -14,6 +14,9 @@ type Order @entity {
   type:String!
   createdBy:Bytes!
   collateral:Bytes!
+  reserveRatio:BigInt!
   value:BigInt!
   status:String!
+  price:BigInt!
+  time:BigInt!
 }

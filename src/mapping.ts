@@ -77,6 +77,29 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
 
   let entity = Order.load(event.params.batchId.toString() + "_" + event.params.buyer.toHexString())
 
+  //Determine price of batch
+  let contract = Contract.bind(event.address)
+  let batch = contract.getBatch(event.params.batchId, event.params.collateral)
+  /*
+    batch.initialized,
+    batch.cancelled,
+    batch.supply,
+    batch.balance,
+    batch.reserveRatio,
+    batch.slippage,
+    batch.totalBuySpend,
+    batch.totalBuyReturn,
+    batch.totalSellSpend,
+    batch.totalSellReturn
+    */
+
+  let batchSupply = batch.value2
+  let batchBalance = batch.value3
+  let batchRR = batch.value4
+
+  let staticPricePPM = contract.getStaticPricePPM(batchSupply, batchBalance, batchRR)
+
+
   if (entity == null) {
     entity = new Order(event.params.batchId.toString() + "_" + event.params.buyer.toHexString())
     entity.batchId = event.params.batchId.toString()
@@ -85,6 +108,9 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
     entity.value = BigInt.fromI32(0)
     entity.createdBy = event.params.buyer
     entity.status = "unclaimed"
+    entity.reserveRatio = batchRR
+    entity.price = staticPricePPM
+    entity.time = event.block.timestamp
   }
 
   //Need to add value if this entity already exists
@@ -97,6 +123,30 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
 
   let entity = Order.load(event.params.batchId.toString() + "_" + event.params.seller.toHexString())
 
+  //Determine price of batch
+  let contract = Contract.bind(event.address)
+  let batch = contract.getBatch(event.params.batchId, event.params.collateral)
+
+  /*
+    batch.initialized,
+    batch.cancelled,
+    batch.supply,
+    batch.balance,
+    batch.reserveRatio,
+    batch.slippage,
+    batch.totalBuySpend,
+    batch.totalBuyReturn,
+    batch.totalSellSpend,
+    batch.totalSellReturn
+    */
+
+  let batchSupply = batch.value2
+  let batchBalance = batch.value3
+  let batchRR = batch.value4
+
+  let staticPricePPM = contract.getStaticPricePPM(batchSupply, batchBalance, batchRR)
+
+
   if (entity == null) {
     entity = new Order(event.params.batchId.toString() + "_" + event.params.seller.toHexString())
     entity.batchId = event.params.batchId.toString()
@@ -105,7 +155,10 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
     entity.type = "sell"
 
     entity.createdBy = event.params.seller
-    entity.status = "pending"
+    entity.status = "unclaimed"
+    entity.reserveRatio = batchRR
+    entity.price = staticPricePPM
+    entity.time = event.block.timestamp
   }
 
   entity.value = entity.value.plus(event.params.amount)
