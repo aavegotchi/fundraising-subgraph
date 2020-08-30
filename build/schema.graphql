@@ -10,6 +10,8 @@ type Batch @entity {
 
 type Order @entity {
   id:ID!
+  txnId:Bytes!
+  claimId:Bytes
   batchId:String!
   type:String!
   createdBy:Bytes!
@@ -19,4 +21,7 @@ type Order @entity {
   status:String!
   price:BigInt!
   time:BigInt!
+
+  ghst:BigInt
+  dai:BigInt
 }

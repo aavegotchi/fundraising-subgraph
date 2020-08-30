@@ -118,6 +118,32 @@ export class Order extends Entity {
     this.set("id", Value.fromString(value));
   }
 
+  get txnId(): Bytes {
+    let value = this.get("txnId");
+    return value.toBytes();
+  }
+
+  set txnId(value: Bytes) {
+    this.set("txnId", Value.fromBytes(value));
+  }
+
+  get claimId(): Bytes | null {
+    let value = this.get("claimId");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBytes();
+    }
+  }
+
+  set claimId(value: Bytes | null) {
+    if (value === null) {
+      this.unset("claimId");
+    } else {
+      this.set("claimId", Value.fromBytes(value as Bytes));
+    }
+  }
+
   get batchId(): string {
     let value = this.get("batchId");
     return value.toString();
@@ -197,5 +223,39 @@ export class Order extends Entity {
 
   set time(value: BigInt) {
     this.set("time", Value.fromBigInt(value));
+  }
+
+  get ghst(): BigInt | null {
+    let value = this.get("ghst");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set ghst(value: BigInt | null) {
+    if (value === null) {
+      this.unset("ghst");
+    } else {
+      this.set("ghst", Value.fromBigInt(value as BigInt));
+    }
+  }
+
+  get dai(): BigInt | null {
+    let value = this.get("dai");
+    if (value === null) {
+      return null;
+    } else {
+      return value.toBigInt();
+    }
+  }
+
+  set dai(value: BigInt | null) {
+    if (value === null) {
+      this.unset("dai");
+    } else {
+      this.set("dai", Value.fromBigInt(value as BigInt));
+    }
   }
 }

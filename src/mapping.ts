@@ -97,12 +97,15 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
   let batchBalance = batch.value3
   let batchRR = batch.value4
 
+
   let staticPricePPM = contract.getStaticPricePPM(batchSupply, batchBalance, batchRR)
+
 
 
   if (entity == null) {
     entity = new Order(event.params.batchId.toString() + "_" + event.params.buyer.toHexString())
     entity.batchId = event.params.batchId.toString()
+    entity.txnId = event.transaction.hash
     entity.collateral = event.params.collateral
     entity.type = "buy"
     entity.value = BigInt.fromI32(0)
@@ -111,13 +114,29 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
     entity.reserveRatio = batchRR
     entity.price = staticPricePPM
     entity.time = event.block.timestamp
+
+
   }
 
   //Need to add value if this entity already exists
-  entity.value = entity.value.plus(event.params.value)
+  //For value we need to divide the value by price and multiply by 1000000
+  entity.dai = event.params.value
+  entity.value = entity.value.plus((event.params.value.div(staticPricePPM)).times(BigInt.fromI32(1000000)))
   entity.save()
 
 }
+
+export function handleClaimBuyOrder(event: ClaimBuyOrder): void {
+
+  let entity = Order.load(event.params.batchId.toString() + "_" + event.params.buyer.toHexString())
+  entity.status = "claimed"
+  entity.value = event.params.amount
+  entity.claimId = event.transaction.hash
+  entity.ghst = event.params.amount
+  entity.save()
+
+}
+
 
 export function handleOpenSellOrder(event: OpenSellOrder): void {
 
@@ -150,6 +169,7 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
   if (entity == null) {
     entity = new Order(event.params.batchId.toString() + "_" + event.params.seller.toHexString())
     entity.batchId = event.params.batchId.toString()
+    entity.txnId = event.transaction.hash
     entity.collateral = event.params.collateral
     entity.value = BigInt.fromI32(0)
     entity.type = "sell"
@@ -159,25 +179,22 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
     entity.reserveRatio = batchRR
     entity.price = staticPricePPM
     entity.time = event.block.timestamp
+
+    entity.ghst = event.params.amount
   }
 
   entity.value = entity.value.plus(event.params.amount)
   entity.save()
 }
 
-export function handleClaimBuyOrder(event: ClaimBuyOrder): void {
-
-  let entity = Order.load(event.params.batchId.toString() + "_" + event.params.buyer.toHexString())
-  entity.status = "claimed"
-  entity.save()
-
-
-}
 
 export function handleClaimSellOrder(event: ClaimSellOrder): void {
 
   let entity = Order.load(event.params.batchId.toString() + "_" + event.params.seller.toHexString())
   entity.status = "claimed"
+  //entity.value = event.params.value
+  entity.claimId = event.transaction.hash
+  entity.dai = event.params.value
   entity.save()
 }
 
