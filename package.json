@@ -7,10 +7,15 @@
     "deploy": "graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ cinnabarhorse/gotchiv1",
     "create-local": "graph create --node http://localhost:8020/ cinnabarhorse/gotchiv1",
     "remove-local": "graph remove --node http://localhost:8020/ cinnabarhorse/gotchiv1",
-    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 cinnabarhorse/gotchiv1"
+    "deploy-local": "graph deploy --node http://localhost:8020/ --ipfs http://localhost:5001 cinnabarhorse/gotchiv1",
+    "prepare:mainnet": "mustache config/mainnet.json subgraph.template.yaml > subgraph.yaml",
+    "prepare:rinkeby": "mustache config/rinkeby.json subgraph.template.yaml > subgraph.yaml",
+    "deploy:rinkeby": "yarn prepare:rinkeby && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ cinnabarhorse/gotchiv1",
+    "deploy:mainnet": "yarn prepare:mainnet && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ cinnabarhorse/aavegotchi-aragon"
   },
   "dependencies": {
     "@graphprotocol/graph-cli": "0.17.1",
-    "@graphprotocol/graph-ts": "0.17.0"
+    "@graphprotocol/graph-ts": "0.17.0",
+    "mustache": "^4.0.1"
   }
 }
