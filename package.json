@@ -14,8 +14,8 @@
     "deploy:mainnet": "yarn prepare:mainnet && graph deploy --node https://api.thegraph.com/deploy/ --ipfs https://api.thegraph.com/ipfs/ cinnabarhorse/aavegotchi-aragon"
   },
   "dependencies": {
-    "@graphprotocol/graph-cli": "0.17.1",
-    "@graphprotocol/graph-ts": "0.17.0",
+    "@graphprotocol/graph-cli": "0.21.1",
+    "@graphprotocol/graph-ts": "0.20.0",
     "mustache": "^4.0.1"
   }
 }
