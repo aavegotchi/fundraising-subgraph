@@ -1,4 +1,4 @@
-import { BigInt, log } from "@graphprotocol/graph-ts"
+import { BigInt } from "@graphprotocol/graph-ts"
 import {
   Contract,
   UpdateBeneficiary,
@@ -163,7 +163,6 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
     batch.totalSellReturn
     */
   if(batch.reverted) {
-    log.info("getBatch reverted; batchId = {}", [event.params.batchId.toString()])
     return;
   }
 
