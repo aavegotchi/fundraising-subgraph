@@ -17,9 +17,7 @@ import {
   ClaimSellOrder,
   ClaimCancelledBuyOrder,
   ClaimCancelledSellOrder,
-  UpdatePricing,
-  ScriptResult,
-  RecoverToVault
+  UpdatePricing
 } from "../generated/Contract/Contract"
 import { Order, Batch } from "../generated/schema"
 
@@ -79,7 +77,7 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
 
   //Determine price of batch
   let contract = Contract.bind(event.address)
-  let batch = contract.getBatch(event.params.batchId, event.params.collateral)
+  let batch = contract.try_getBatch(event.params.batchId, event.params.collateral)
   /*
     batch.initialized,
     batch.cancelled,
@@ -92,16 +90,22 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
     batch.totalSellSpend,
     batch.totalSellReturn
     */
+  if(batch.reverted) {
+    return;
+  }
 
-  let batchSupply = batch.value2
-  let batchBalance = batch.value3
-  let batchRR = batch.value4
+  let batchSupply = batch.value.value2
+  let batchBalance = batch.value.value3
+  let batchRR = batch.value.value4
 
 
-  let staticPricePPM = contract.getStaticPricePPM(batchSupply, batchBalance, batchRR)
-
-
-
+  let staticPricePPM = contract.try_getStaticPricePPM(batchSupply, batchBalance, batchRR)
+  let price: BigInt;
+  if(!staticPricePPM.reverted) {
+    price = staticPricePPM.value
+  } else {
+    price = BigInt.fromI32(1000000);
+  }
   if (entity == null) {
     entity = new Order(event.params.batchId.toString() + "_" + event.params.buyer.toHexString())
     entity.batchId = event.params.batchId.toString()
@@ -112,7 +116,7 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
     entity.createdBy = event.params.buyer
     entity.status = "unclaimed"
     entity.reserveRatio = batchRR
-    entity.price = staticPricePPM
+    entity.price = price
     entity.time = event.block.timestamp
 
 
@@ -121,7 +125,7 @@ export function handleOpenBuyOrder(event: OpenBuyOrder): void {
   //Need to add value if this entity already exists
   //For value we need to divide the value by price and multiply by 1000000
   entity.dai = event.params.value
-  entity.value = entity.value.plus((event.params.value.div(staticPricePPM)).times(BigInt.fromI32(1000000)))
+  entity.value = entity.value.plus((event.params.value.div(price)).times(BigInt.fromI32(1000000)))
   entity.save()
 
 }
@@ -144,7 +148,7 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
 
   //Determine price of batch
   let contract = Contract.bind(event.address)
-  let batch = contract.getBatch(event.params.batchId, event.params.collateral)
+  let batch = contract.try_getBatch(event.params.batchId, event.params.collateral)
 
   /*
     batch.initialized,
@@ -158,13 +162,21 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
     batch.totalSellSpend,
     batch.totalSellReturn
     */
+  if(batch.reverted) {
+    return;
+  }
 
-  let batchSupply = batch.value2
-  let batchBalance = batch.value3
-  let batchRR = batch.value4
+  let batchSupply = batch.value.value2
+  let batchBalance = batch.value.value3
+  let batchRR = batch.value.value4
 
-  let staticPricePPM = contract.getStaticPricePPM(batchSupply, batchBalance, batchRR)
-
+  let staticPricePPM = contract.try_getStaticPricePPM(batchSupply, batchBalance, batchRR)
+  let price: BigInt;
+  if(!staticPricePPM.reverted) {
+    price = staticPricePPM.value
+  } else {
+    price = BigInt.fromI32(1000000);
+  }
 
   if (entity == null) {
     entity = new Order(event.params.batchId.toString() + "_" + event.params.seller.toHexString())
@@ -177,7 +189,7 @@ export function handleOpenSellOrder(event: OpenSellOrder): void {
     entity.createdBy = event.params.seller
     entity.status = "unclaimed"
     entity.reserveRatio = batchRR
-    entity.price = staticPricePPM
+    entity.price = price
     entity.time = event.block.timestamp
 
     entity.ghst = event.params.amount
